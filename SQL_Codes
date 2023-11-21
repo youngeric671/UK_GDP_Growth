@@ -1,0 +1,56 @@
+select * from UK_GDP
+
+--Create and Insert into new table that would be used for Data wrangling
+create table 
+	UKGDPWORKING
+	([Time Period] nvarchar(255),
+	[GDP Growth] float)
+
+With cte_table
+as
+(select
+	[Time Period],
+	[GDP Growth]
+from UK_GDP)
+
+insert into UKGDPWORKING
+select 
+	[Time Period],
+	[GDP Growth]
+from cte_table
+
+select * from UKGDPWORKING
+
+--clean the date column
+select 
+	substring ([Time Period],2,CHARINDEX('/',[Time Period])+1) as [Month],
+	substring ([Time Period],CHARINDEX('/',[Time Period])+4,LEN([Time Period])) as Year
+from UKGDPWORKING
+
+select
+CONCAT(substring ([Time Period],2,CHARINDEX('/',[Time Period])+1),'/',
+	substring ([Time Period],CHARINDEX('/',[Time Period])+4,LEN([Time Period])))
+from UKGDPWORKING
+
+alter table UkGDPWORKING
+add Time_Period nvarchar(255)
+	
+Update UkGDPWORKING
+set Time_Period = CONCAT(substring ([Time Period],2,CHARINDEX('/',[Time Period])+1),'/',
+	substring ([Time Period],CHARINDEX('/',[Time Period])+4,LEN([Time Period])))
+
+select * from UKGDPWORKING
+
+create view 
+[UK_Month_GDP]
+as
+(select 
+	* 
+from 
+	UKGDPWORKING)
+
+-- Month and year with highest growth
+select MAX([GDP Growth]) Growth, [Time_Period]
+from UKGDPWORKING
+group by [Time_Period]
+order by MAX([GDP Growth]) desc
